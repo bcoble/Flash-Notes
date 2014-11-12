@@ -137,5 +137,20 @@ public class FlashNotes {
 		}
 
 	}
-
+	public static int countTerm(String term, String document){
+		int count = 0;
+		String[] wordArray;
+		if(document.toLowerCase().contains(term.toLowerCase())){
+			wordArray=document.split(" ");
+			for(int i=0;i<wordArray.length;i++){
+				if(wordArray[i].toLowerCase().equals(term.toLowerCase())){
+					count++;
+				}
+			}
+		}else{
+			return 0;
+		}
+		return count;
+		
+	}
 }
