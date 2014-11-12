@@ -57,6 +57,7 @@ public class FlashNotes {
 
 			summarize(out, length_of_summary, fileContents);
 			
+			// TODO - ben : add writer that takes an arrayList<string>
 			
 			// Print out to console - could replace with file writing
 			for (List<CoreLabel> sentence : out) {
@@ -146,8 +147,10 @@ public class FlashNotes {
 		boolean ner2_done = true;
 		boolean no_quotes = false;
 		boolean only_dates = false;		
-		
+		int iterations = 0;
 		while(summary.size() > cap){
+			iterations ++;
+			System.out.println("Summary: " + iterations);
 			ArrayList<List<CoreLabel>> temp = new ArrayList<List<CoreLabel>>();
 			
 			for (List<CoreLabel> sentence : summary) {
@@ -211,9 +214,8 @@ public class FlashNotes {
 		for (List<CoreLabel> sentence : summary) {
 			System.out.println(sentence);
 		}
-			// NER pairs - tough
 		
 		// format summarizer by date and to pretty print
-		
+		// TODO - chris : compile summary into pretty print ArrayList<string>.
 	}
 }
