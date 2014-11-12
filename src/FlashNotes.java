@@ -23,14 +23,23 @@ public class FlashNotes {
 	public static void main(String[] args) throws ClassCastException,
 			ClassNotFoundException, IOException {
 
-		String serializedClassifier = "classifiers/english.muc.7class.distsim.crf.ser.gz";
+		// Example arguments: 5 Presidents/AbrahamLincoln.txt summary.txt
+		// Format: <number of lines> <input name> <output name>
 
-		if (args.length > 0) {
-			serializedClassifier = args[0];
-		}
+		String serializedClassifier = "classifiers/english.muc.7class.distsim.crf.ser.gz";
 		
-		// Set output file - TODO improve
-		PrintWriter writer = new PrintWriter("summary.txt", "UTF-8");
+		String outfile = "summary.txt";
+		String infile = args[1];
+		int length_of_summary = Integer.getInteger(args[0]);
+		
+//		System.out.println(args[0]+"-"+args[1]+"-"+args[2]);
+		
+		if (args.length > 2) {
+			outfile = args[2];
+		}
+
+		// Set output file
+		PrintWriter writer = new PrintWriter(outfile, "UTF-8");
 
 		// Set classifier
 		AbstractSequenceClassifier<CoreLabel> classifier = CRFClassifier
@@ -39,11 +48,11 @@ public class FlashNotes {
 		// How to classify an input file
 		if (args.length > 1) {
 			// Parse file to a string
-			String fileContents = IOUtils.slurpFile(args[1]);
-			
+			String fileContents = IOUtils.slurpFile(infile);
+
 			// Apply the classifier
 			List<List<CoreLabel>> out = classifier.classify(fileContents);
-			
+
 			// Print out to console - could replace with file writing
 			for (List<CoreLabel> sentence : out) {
 				int nerCount = 0;
@@ -52,90 +61,27 @@ public class FlashNotes {
 					String line = "";
 					s = sentence.toString();
 					line += word.word();
-					String wClass = word.get(CoreAnnotations.AnswerAnnotation.class);
-					if (!wClass.equals("O")){
+					String wClass = word
+							.get(CoreAnnotations.AnswerAnnotation.class);
+					if (!wClass.equals("O")) {
 						nerCount++;
-						line += "/"+wClass+" ";
+						line += "/" + wClass + " ";
 					} else {
 						line += " ";
 					}
-//					line += wClass.equals("O") ? " " : "/" + wClass + " ";
-//					System.out.print(word.word() + '/'
-//							+ word.get(CoreAnnotations.AnswerAnnotation.class)
-//							+ ' ');
+
 					System.out.print(line);
 				}
 				System.out.println();
-				
+
 				// Write to summary file if nerCount is high enough.
-				if (nerCount >= 2){
+				// TODO - tweak this to adjust based on count
+				if (nerCount >= 2) {
 					writer.println(s);
 				}
 			}
 			writer.close();
-			
-			
-			
-			
-			
-			
-			
-			
-			
-			
-			
-//			System.out.println("-*-*-");
-//			out = classifier.classifyFile(args[1]);
-//			for (List<CoreLabel> sentence : out) {
-//				for (CoreLabel word : sentence) {
-//					System.out.print(word.word() + '/'
-//							+ word.get(CoreAnnotations.AnswerAnnotation.class)
-//							+ ' ');
-//				}
-//				System.out.println();
-//			}
 
 		}
-		// Run on a single string
-		else {
-			String[] example = {
-					"Good afternoon Rajat Raina, how are you today?",
-					"I go to school at Stanford University, which is located in California." };
-			for (String str : example) {
-				System.out.println(classifier.classifyToString(str));
-			}
-			System.out.println("---");
-
-			for (String str : example) {
-				// This one puts in spaces and newlines between tokens, so just
-				// print not println.
-				System.out.print(classifier.classifyToString(str, "slashTags",
-						false));
-			}
-			System.out.println("---");
-
-			for (String str : example) {
-				System.out.println(classifier.classifyWithInlineXML(str));
-			}
-			System.out.println("---");
-
-			for (String str : example) {
-				System.out.println(classifier
-						.classifyToString(str, "xml", true));
-			}
-			System.out.println("---");
-
-			int i = 0;
-			for (String str : example) {
-				for (List<CoreLabel> lcl : classifier.classify(str)) {
-					for (CoreLabel cl : lcl) {
-						System.out.print(i++ + ": ");
-						System.out.println(cl.toShorterString());
-					}
-				}
-			}
-		}
-
 	}
-
 }
