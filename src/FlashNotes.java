@@ -3,7 +3,6 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 import edu.stanford.nlp.ie.AbstractSequenceClassifier;
@@ -37,8 +36,6 @@ public class FlashNotes {
 		String num = args[0];
 		int length_of_summary = Integer.valueOf(num);
 
-		// System.out.println(args[0]+"-"+args[1]+"-"+args[2]);
-
 		if (args.length > 2) {
 			outfile = args[2];
 		}
@@ -55,18 +52,23 @@ public class FlashNotes {
 			// Apply the classifier
 			List<List<CoreLabel>> out = classifier.classify(fileContents);
 
+			// Run the summarizer
 			ArrayList<String> results = summarize(out, length_of_summary, fileContents);
 			
-			// TODO - ben : add writer that takes an arrayList<string>
-//			results.add("This");
-//			results.add("is");
-//			results.add("a");
-//			results.add("test.");
+			// Write results to designated file
 			writeResults(results, outfile);		
 
 		}
 	}
 
+	/**
+	 * Writes the text summary to a file
+	 * 
+	 * @param text
+	 * @param outfile
+	 * @throws FileNotFoundException
+	 * @throws UnsupportedEncodingException
+	 */
 	public static void writeResults(ArrayList<String> text, String outfile) throws FileNotFoundException, UnsupportedEncodingException{
 		PrintWriter writer = new PrintWriter(outfile, "UTF-8");
 		for (String line: text){
@@ -75,7 +77,13 @@ public class FlashNotes {
 		writer.close();		
 	}
 	
-	
+	/**
+	 * Counts the number of occurrences of a term in the document.
+	 * 
+	 * @param term
+	 * @param document
+	 * @return
+	 */
 	public static int countTerm(String term, String document) {
 		int count = 0;
 		String[] wordArray;
@@ -93,6 +101,14 @@ public class FlashNotes {
 
 	}
 	
+	/**
+	 * Performs the summarizing function on a text that has been classified.
+	 * 
+	 * @param text
+	 * @param cap
+	 * @param doc
+	 * @return
+	 */
 	public static ArrayList<String> summarize(List<List<CoreLabel>> text, int cap, String doc){
 
 		ArrayList<List<CoreLabel>> summary = new ArrayList<List<CoreLabel>>();
@@ -117,25 +133,18 @@ public class FlashNotes {
 		}
 		String pregen = "This is a biography about " + bio_person + ".";
 
-		
-//		for(int i=0;i<text.size();i++){
-//			String phrase = "";
-//			for(int j=0;j<text.get(i).size();j++){
-//				phrase += text.get(i).get(j).word() + " ";
-//			}
-//			summary.add(phrase);
-//		}
-
 		summary.addAll(text);
 		
-		// while loop - check summary size to wanted size
+		// booleans to control how "harsh" the summarizer is
 		boolean ner2_done = true;
 		boolean no_quotes = false;
 		boolean only_dates = false;		
 		int iterations = 0;
+		
+		// Loops until summary is under the cap
 		while(summary.size() > cap){
 			iterations ++;
-			System.out.println("Summary: " + iterations);
+			System.out.println("Iteration: " + iterations);
 			ArrayList<List<CoreLabel>> temp = new ArrayList<List<CoreLabel>>();
 			
 			for (List<CoreLabel> sentence : summary) {
@@ -148,6 +157,7 @@ public class FlashNotes {
 					String wClass = word
 							.get(CoreAnnotations.AnswerAnnotation.class);
 					
+					// Set booleans based on terms located in phrase
 					if (!wClass.equals("O")){
 						nerCount++;
 					}
@@ -159,7 +169,7 @@ public class FlashNotes {
 					}
 					
 				}
-				// boolean checks
+				// boolean checks - this decides if a phrase is included in the summary
 				if (ner2_done){ // ner 2 check
 					if (nerCount >= 2){
 						if (no_quotes){ // quotes check
@@ -180,8 +190,11 @@ public class FlashNotes {
 			}
 			
 			summary = temp;
-			// Break out if all the ways of summarizing are exhausted
-
+			
+			// Sets the next level of summarizing based on the current level
+			// ie. if ner2 is done but quotes haven't been removed and it is
+			// still over the cap, it will set that boolean for the next loop.
+			// Also breaks out if all the ways of summarizing are exhausted.
 			if (ner2_done){
 				if (no_quotes){
 					if (only_dates){
@@ -195,16 +208,30 @@ public class FlashNotes {
 			}
 		}
 			
+		ArrayList<String> results = new ArrayList<String>();
+		results = prettyFormatter(summary, pregen);
+		return results;
+	}
+	
+	/**
+	 * Re-formats the summary for writing to a file
+	 * 
+	 * @param summary
+	 * @param pregen
+	 * @return
+	 */
+	public static ArrayList<String> prettyFormatter(ArrayList<List<CoreLabel>> summary, String pregen){
+		ArrayList<String> results = new ArrayList<String>();
+		results.add(pregen);
 		
-		for (List<CoreLabel> sentence : summary) {
-			System.out.println(sentence);
+		for (List<CoreLabel> sentence : summary){
+			String line = "";
+			for (CoreLabel word : sentence){
+				line += word.word() + " ";
+			}
+			results.add(line);
 		}
 		
-		// format summarizer by date and to pretty print
-		// TODO - chris : compile summary into pretty print ArrayList<string>.
-		
-		
-		ArrayList<String> results = new ArrayList<String>();
 		return results;
 	}
 }
