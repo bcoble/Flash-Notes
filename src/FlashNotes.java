@@ -1,6 +1,9 @@
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import edu.stanford.nlp.ie.AbstractSequenceClassifier;
@@ -40,9 +43,6 @@ public class FlashNotes {
 			outfile = args[2];
 		}
 
-		// Set output file
-		PrintWriter writer = new PrintWriter(outfile, "UTF-8");
-
 		// Set classifier
 		AbstractSequenceClassifier<CoreLabel> classifier = CRFClassifier
 				.getClassifier(serializedClassifier);
@@ -55,42 +55,27 @@ public class FlashNotes {
 			// Apply the classifier
 			List<List<CoreLabel>> out = classifier.classify(fileContents);
 
-			summarize(out, length_of_summary, fileContents);
+			ArrayList<String> results = summarize(out, length_of_summary, fileContents);
 			
 			// TODO - ben : add writer that takes an arrayList<string>
-			
-			// Print out to console - could replace with file writing
-			for (List<CoreLabel> sentence : out) {
-				int nerCount = 0;
-				String s = "";
-				for (CoreLabel word : sentence) {
-					String line = "";
-					s = sentence.toString();
-					line += word.word();
-					String wClass = word
-							.get(CoreAnnotations.AnswerAnnotation.class);
-					if (!wClass.equals("O")) {
-						nerCount++;
-						line += "/" + wClass + " ";
-					} else {
-						line += " ";
-					}
-
-//					System.out.print(line);
-				}
-//				System.out.println();
-
-				// Write to summary file if nerCount is high enough.
-				// TODO - tweak this to adjust based on count
-				if (nerCount >= 2) {
-					writer.println(s);
-				}
-			}
-			writer.close();
+//			results.add("This");
+//			results.add("is");
+//			results.add("a");
+//			results.add("test.");
+			writeResults(results, outfile);		
 
 		}
 	}
 
+	public static void writeResults(ArrayList<String> text, String outfile) throws FileNotFoundException, UnsupportedEncodingException{
+		PrintWriter writer = new PrintWriter(outfile, "UTF-8");
+		for (String line: text){
+			writer.println(line);
+		}
+		writer.close();		
+	}
+	
+	
 	public static int countTerm(String term, String document) {
 		int count = 0;
 		String[] wordArray;
@@ -108,7 +93,7 @@ public class FlashNotes {
 
 	}
 	
-	public static void summarize(List<List<CoreLabel>> text, int cap, String doc){
+	public static ArrayList<String> summarize(List<List<CoreLabel>> text, int cap, String doc){
 
 		ArrayList<List<CoreLabel>> summary = new ArrayList<List<CoreLabel>>();
 				
@@ -217,5 +202,9 @@ public class FlashNotes {
 		
 		// format summarizer by date and to pretty print
 		// TODO - chris : compile summary into pretty print ArrayList<string>.
+		
+		
+		ArrayList<String> results = new ArrayList<String>();
+		return results;
 	}
 }
