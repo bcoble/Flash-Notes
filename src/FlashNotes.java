@@ -76,7 +76,6 @@ public class FlashNotes {
 		ArrayList<List<CoreLabel>> summary = new ArrayList<List<CoreLabel>>();
 
 		// Finds who the bio is about.
-		// TODO - make it only count ner's of type PERSON
 		String bio_person = "Harry Potter";
 		int current_count = 0;
 		for (List<CoreLabel> sentence : text) {
@@ -88,6 +87,7 @@ public class FlashNotes {
 				if (wClass.equals("PERSON")) {
 					freq = countTerm(ner, doc);
 					if (freq > current_count) {
+						current_count = freq;
 						bio_person = ner;
 					}
 				}
@@ -172,7 +172,7 @@ public class FlashNotes {
 		}
 
 		ArrayList<String> results = new ArrayList<String>();
-		results = prettyFormatter(summary, pregen);
+		results = prettyFormatter(summary, pregen, cap);
 		return results;
 	}
 
@@ -224,17 +224,21 @@ public class FlashNotes {
 	 * @param pregen
 	 * @return
 	 */
-	public static ArrayList<String> prettyFormatter(ArrayList<List<CoreLabel>> summary, String pregen){
+	public static ArrayList<String> prettyFormatter(ArrayList<List<CoreLabel>> summary, String pregen, int cap){
 		ArrayList<String> results = new ArrayList<String>();
 		results.add(pregen);
 		
+		int count = 0;
 		for (List<CoreLabel> sentence : summary){
 			String line = "";
+			count++;
 			for (CoreLabel word : sentence){
 				String w = word.word();
 				line = w.equals(".") || w.equals(",") || w.equals("!") || w.equals("?") || w.equals("'") ? line + w : line + " " + w;
 			}
-			results.add(line);
+			if (count <= cap){
+				results.add(line);
+			}
 		}
 		
 		return results;
