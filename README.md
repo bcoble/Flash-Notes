@@ -1,0 +1,3 @@
+This is a project for CSSE 413 at Rose-Hulman Institute of Technology. I worked with Chris Andrews in the Fall of 2014.
+This project requires the stanford NER java tools and Java JRE 1.8. If you wish to duplicate our work or run it yourself and are having problems, feel free to email me (ben.j.coble@gmail.com). 
+This project is capable of summarizing text files of biographies and theoretically should work for other historical texts. The tests are named for their respective president biographer followed by the number of lines designated as the cap.
